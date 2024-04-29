@@ -26,13 +26,13 @@ def fdipolo_network():
     bus17 = pp.create_bus(net, vn_kv=20, name="00102000459A1", geodata=(42.56470751, 12.59332143), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
     bus18 = pp.create_bus(net, vn_kv=20, name="100001737", geodata=(42.562806023499064, 12.60568432070056), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
     # LV BUS
-    bus19 = pp.create_bus(net, vn_kv=20, name="00102000459A1_LV", geodata=(42.56470751, 12.59332143), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
-    bus20 = pp.create_bus(net, vn_kv=20, name="00102000722A1_LV", geodata=(42.59163941, 12.59406697), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
-    bus21 = pp.create_bus(net, vn_kv=20, name="00102000723A1_LV", geodata=(42.57165583, 12.58597006), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
-    bus22 = pp.create_bus(net, vn_kv=20, name="00102000725A1_LV", geodata=(42.56725771, 12.59443875), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
-    bus23 = pp.create_bus(net, vn_kv=20, name="00102000827A1_LV", geodata=(42.56587048, 12.58831038), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
-    bus24 = pp.create_bus(net, vn_kv=20, name="00102000724A1_LV", geodata=(42.56738887, 12.59435605), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
-    bus25 = pp.create_bus(net, vn_kv=20, name="00102000764A1_LV", geodata=(42.56799926, 12.58852029), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
+    bus19 = pp.create_bus(net, vn_kv=0.4, name="00102000459A1_LV", geodata=(42.56470751, 12.59332143), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
+    bus20 = pp.create_bus(net, vn_kv=0.4, name="00102000722A1_LV", geodata=(42.59163941, 12.59406697), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
+    bus21 = pp.create_bus(net, vn_kv=0.4, name="00102000723A1_LV", geodata=(42.57165583, 12.58597006), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
+    bus22 = pp.create_bus(net, vn_kv=0.4, name="00102000725A1_LV", geodata=(42.56725771, 12.59443875), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
+    bus23 = pp.create_bus(net, vn_kv=0.4, name="00102000827A1_LV", geodata=(42.56587048, 12.58831038), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
+    bus24 = pp.create_bus(net, vn_kv=0.4, name="00102000724A1_LV", geodata=(42.56738887, 12.59435605), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
+    bus25 = pp.create_bus(net, vn_kv=0.4, name="00102000764A1_LV", geodata=(42.56799926, 12.58852029), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
 
     # bus18 = pp.create_bus(net, vn_kv=20, name="ns0492_000", geodata=(12.63418, 42.526908), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
     # bus19 = pp.create_bus(net, vn_kv=20, name="nd0103_000", geodata=(12.622921, 42.531), type='b', in_service=True, max_vm_pu=1.1, min_vm_pu=0.9)
@@ -81,146 +81,80 @@ def fdipolo_network():
     line20 = pp.create_line(net, from_bus=pp.get_element_index(net, "bus", "00102000459A1"), to_bus=pp.get_element_index(net, "bus", "INT0459A1_0725A1_0"), length_km=0.325, std_type="C_CU_185", name="00102000459A1_INT0459A1_0725A1_0")
     
     # create transformer codes https://pandapower.readthedocs.io/en/latest/std_types/manage.html
-    pp.create_std_type(net, {"sn_mva": 1.6,
-        "vn_hv_kv": 10,
+    pp.create_std_type(net, {"sn_mva": 0.16,
+        "vn_hv_kv": 20,
         "vn_lv_kv": 0.4,
         "vk_percent": 6,
-        "vkr_percent": 0.78125,
-        "pfe_kw": 2.7,
-        "i0_percent": 0.16875,
+        "vkr_percent": (2.3-0.65)/160,
+        "pfe_kw": 0.65,
+        "i0_percent": 2.3,
         "shift_degree": 0,
-        "vector_group": vector_group,
+        "vector_group": 'Dyn',
         "tap_side": "lv",
         "tap_neutral": 0,
         "tap_min": -2,
         "tap_max": 2,
         "tap_step_degree": 0,
         "tap_step_percent": 2.5,
-        "tap_phase_shifter": False,
-        "vk0_percent": 6,
-        "vkr0_percent": 0.78125,
-        "mag0_percent": 100,
-        "mag0_rx": 0.,
-        "si0_hv_partial": 0.9,}, name='SIEMENS_TR_160kVA', element="trafo")
+        "tap_phase_shifter":False}, name='SIEMENS_TR_160kVA', element="trafo", overwrite=True, check_required=True)
         
-    pp.create_std_type(net, {"sn_mva": 1.6,
-        "vn_hv_kv": 10,
+    pp.create_std_type(net, {"sn_mva": 0.1,
+        "vn_hv_kv": 20,
         "vn_lv_kv": 0.4,
         "vk_percent": 6,
-        "vkr_percent": 0.78125,
-        "pfe_kw": 2.7,
-        "i0_percent": 0.16875,
+        "vkr_percent": (1.8-0.46)/100,
+        "pfe_kw": 0.46,
+        "i0_percent": 2.5,
         "shift_degree": 0,
-        "vector_group": vector_group,
+        "vector_group": 'Dyn',
         "tap_side": "lv",
         "tap_neutral": 0,
         "tap_min": -2,
         "tap_max": 2,
         "tap_step_degree": 0,
-        "tap_step_percent": 2.5,
-        "tap_phase_shifter": False,
-        "vk0_percent": 6,
-        "vkr0_percent": 0.78125,
-        "mag0_percent": 100,
-        "mag0_rx": 0.,
-        "si0_hv_partial": 0.9,}, name='FDIPOLO_TR_100kVA', element="trafo")
+        "tap_step_percent": 2.5, "tap_phase_shifter":False}, name='FDIPOLO_TR_100kVA', element="trafo", overwrite=True, check_required=True)
     
-    pp.create_std_type(net, {"sn_mva": 1.6,
-        "vn_hv_kv": 10,
+    pp.create_std_type(net, {"sn_mva": 0.4,
+        "vn_hv_kv": 20,
         "vn_lv_kv": 0.4,
         "vk_percent": 6,
-        "vkr_percent": 0.78125,
-        "pfe_kw": 2.7,
-        "i0_percent": 0.16875,
+        "vkr_percent": (4.8-1.2)/400,
+        "pfe_kw": 1.2,
+        "i0_percent": 1.5,
         "shift_degree": 0,
-        "vector_group": vector_group,
+        "vector_group": 'Dyn',
         "tap_side": "lv",
         "tap_neutral": 0,
         "tap_min": -2,
         "tap_max": 2,
         "tap_step_degree": 0,
-        "tap_step_percent": 2.5,
-        "tap_phase_shifter": False,
-        "vk0_percent": 6,
-        "vkr0_percent": 0.78125,
-        "mag0_percent": 100,
-        "mag0_rx": 0.,
-        "si0_hv_partial": 0.9,}, name='AVIOSUPERFICIE_TR_400kVA', element="trafo")
+        "tap_step_percent": 2.5, "tap_phase_shifter":False}, name='AVIOSUPERFICIE_TR_400kVA', element="trafo", overwrite=True, check_required=True)
     
-    pp.create_std_type(net, {"sn_mva": 1.6,
-        "vn_hv_kv": 10,
-        "vn_lv_kv": 0.4,
-        "vk_percent": 6,
-        "vkr_percent": 0.78125,
-        "pfe_kw": 2.7,
-        "i0_percent": 0.16875,
-        "shift_degree": 0,
-        "vector_group": vector_group,
-        "tap_side": "lv",
-        "tap_neutral": 0,
-        "tap_min": -2,
-        "tap_max": 2,
-        "tap_step_degree": 0,
-        "tap_step_percent": 2.5,
-        "tap_phase_shifter": False,
-        "vk0_percent": 6,
-        "vkr0_percent": 0.78125,
-        "mag0_percent": 100,
-        "mag0_rx": 0.,
-        "si0_hv_partial": 0.9,}, name='TRE_T_TR_160kVA', element="trafo")
     
-    pp.create_std_type(net, {"sn_mva": 1.6,
-        "vn_hv_kv": 10,
+    pp.create_std_type(net, {"sn_mva": 0.25,
+        "vn_hv_kv": 20,
         "vn_lv_kv": 0.4,
         "vk_percent": 6,
-        "vkr_percent": 0.78125,
-        "pfe_kw": 2.7,
-        "i0_percent": 0.16875,
+        "vkr_percent": (3.4-0.88)/250,
+        "pfe_kw": 0.88,
+        "i0_percent": 2,
         "shift_degree": 0,
-        "vector_group": vector_group,
+        "vector_group": 'Dyn',
         "tap_side": "lv",
         "tap_neutral": 0,
         "tap_min": -2,
         "tap_max": 2,
         "tap_step_degree": 0,
-        "tap_step_percent": 2.5,
-        "tap_phase_shifter": False,
-        "vk0_percent": 6,
-        "vkr0_percent": 0.78125,
-        "mag0_percent": 100,
-        "mag0_rx": 0.,
-        "si0_hv_partial": 0.9,}, name='ANGELINI_TR_250kVA', element="trafo")
-    
-    pp.create_std_type(net, {"sn_mva": 1.6,
-        "vn_hv_kv": 10,
-        "vn_lv_kv": 0.4,
-        "vk_percent": 6,
-        "vkr_percent": 0.78125,
-        "pfe_kw": 2.7,
-        "i0_percent": 0.16875,
-        "shift_degree": 0,
-        "vector_group": vector_group,
-        "tap_side": "lv",
-        "tap_neutral": 0,
-        "tap_min": -2,
-        "tap_max": 2,
-        "tap_step_degree": 0,
-        "tap_step_percent": 2.5,
-        "tap_phase_shifter": False,
-        "vk0_percent": 6,
-        "vkr0_percent": 0.78125,
-        "mag0_percent": 100,
-        "mag0_rx": 0.,
-        "si0_hv_partial": 0.9,}, name='ARCHIMEDE_TR_250kVA', element="trafo")
+        "si0_hv_partial": 0.9, "tap_phase_shifter":False}, name='ANGELINI_TR_250kVA', element="trafo", overwrite=True, check_required=True)
     
     # create transfomermers
-    tr1 = pp.create_transformer(net, "00102000459A1", "00102000459A1_LV", std_type, name="SIEMENS_TR", in_service=True, parallel=1)
-    tr2 = pp.create_transformer(net, "00102000722A1", "00102000722A1_LV", std_type, name="FDIPOLO_TR", in_service=True, parallel=1)
-    tr3 = pp.create_transformer(net, "00102000723A1", "00102000723A1_LV", std_type, name="AVIOSUPERFICIE_TR", in_service=True, parallel=1)
-    tr4 = pp.create_transformer(net, "00102000725A1", "00102000725A1_LV", std_type, name="TRE_T_TR", in_service=True, parallel=1)
-    tr5 = pp.create_transformer(net, "00102000827A1", "00102000827A1_LV", std_type, name="ANGELINI_TR", in_service=True, parallel=1)
+    tr1 = pp.create_transformer(net, hv_bus=pp.get_element_index(net, "bus", "00102000459A1"), lv_bus=pp.get_element_index(net, "bus", "00102000459A1_LV"), std_type="SIEMENS_TR_160kVA", name="SIEMENS_TR", in_service=True, parallel=1)
+    tr2 = pp.create_transformer(net, hv_bus=pp.get_element_index(net, "bus","00102000722A1"), lv_bus=pp.get_element_index(net, "bus","00102000722A1_LV"), std_type="FDIPOLO_TR_100kVA", name="FDIPOLO_TR", in_service=True, parallel=1)
+    tr3 = pp.create_transformer(net, hv_bus=pp.get_element_index(net, "bus", "00102000723A1"), lv_bus=pp.get_element_index(net, "bus","00102000723A1_LV"), std_type="AVIOSUPERFICIE_TR_400kVA", name="AVIOSUPERFICIE_TR", in_service=True, parallel=1)
+    tr4 = pp.create_transformer(net, hv_bus=pp.get_element_index(net,  "bus","00102000725A1"), lv_bus=pp.get_element_index(net, "bus","00102000725A1_LV"), std_type="SIEMENS_TR_160kVA", name="TRE_T_TR", in_service=True, parallel=1)
+    tr5 = pp.create_transformer(net, hv_bus=pp.get_element_index(net, "bus", "00102000827A1"), lv_bus=pp.get_element_index(net, "bus","00102000827A1_LV"), std_type="ANGELINI_TR_250kVA", name="ANGELINI_TR", in_service=True, parallel=1)
 #     tr7 = pp.create_transformer(net, "00102000724A1", "00102000724A1_LV", std_type, name="TECHNOMULTISERVICE_TR", in_service=True, parallel=1) THERE IS NO TRANSF. 
-    tr6 = pp.create_transformer(net, "00102000764A1", "00102000764A1_LV", std_type, name="ARCHIMEDE_TR", in_service=True, parallel=1)
+    tr6 = pp.create_transformer(net, hv_bus=pp.get_element_index(net,  "bus","00102000764A1"), lv_bus=pp.get_element_index(net, "bus","00102000764A1_LV"), std_type="ANGELINI_TR_250kVA", name="ARCHIMEDE_TR", in_service=True, parallel=1)
 
     
     # create loads

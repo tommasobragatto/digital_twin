@@ -1,6 +1,6 @@
 import pandapower as pp
 import json
-import network_function_FdiPOLO_with_correct_coordinations2
+import network_function_FdiPOLO_with_correct_coordinations2_LV
 import time
 import pygad
 import numpy
@@ -14,6 +14,7 @@ from datetime import datetime
 import pandas as pd
 
 import subprocess
+import openpyxl
 
 fig, ax = plt.subplots(3, 1, sharex=True)  # Create a figure with 3 subplots (3 rows, 1 column)
 
@@ -72,20 +73,23 @@ json_object = {"d": 4,
 attivo_flessibilita=False
 MAX_TIME=5
 
-net = network_function_FdiPOLO_with_correct_coordinations2.fdipolo_network()
-initial_population=[[1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1],[1,1,1,1,1,1,1,1,1,1,1]] #TODO
+net = network_function_FdiPOLO_with_correct_coordinations2_LV.fdipolo_network()
+initial_population=[[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001]] #TODO
+
+carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice", "Angelini"]   # Loads to be estimated
+nodi_noti = ["23", "24", "18", "20", "19"] #nodi_noti in english means nodes_known
 
 
 while True:
     inizio = time.time()
 ### INDIVIDUAL METERS ARE INVOKED IN ORDER TO COLLECT DATA ###
-    subprocess.call(['python', "testMain.py"])
+    #subprocess.call(['python', "testMain.py"])
     
     ####################################################################################################################################              
-    
+    ora_attuale = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
     # Load the MV dataset
-    dataset_path = r'C:\Users\ghoreishi.m\OneDrive - ASM Terni S.p.a\WORK\Mohammad Ghoreishi\ASM Terni\Feeder FDP\MV users\quarter_hourly\implement_MV.xlsx'
-    df = pd.read_excel(dataset_path)
+    file_path = "implement_MV.xlsx"
+    df = pd.read_excel(file_path)
     # Get the current day of the week (Monday = 0, Sunday = 6) and current time
     current_day = datetime.now().weekday()
     current_time = datetime.now().replace(second=0, microsecond=0, minute=(datetime.now().minute // 15) * 15)
@@ -168,7 +172,13 @@ while True:
     net.load.p_mw.at[pp.get_element_index(net, "load", "Angelini")] = sum(all_p_values_5)/1000000
     net.load.q_mvar.at[pp.get_element_index(net, "load", "Angelini")] = sum(all_q_values_5)/1000000
  
+ 
+    o = open(r"ANGELINI_MEASURED.txt", "a")
+    o.write("\n" + f"[{ora_attuale}];" + str(sum(all_q_values_5)/1000000))
+    o.close()
+    
     # Extract active and reactive values for the calculated index
+    
     P_ANGELINI_max = df.iloc[time_interval_index]["P_ANGELINI_LV_max"]/1000000
     Q_ANGELINI_max = df.iloc[time_interval_index]["Q_ANGELINI_LV_max"]/1000000
     P_ANGELINI_min = df.iloc[time_interval_index]["P_ANGELINI_LV_min"]/1000000
@@ -219,15 +229,17 @@ while True:
 #### STATE ESTITMATION ##########    
     def fitness_func(ga_instance, solution, solution_idx):
 
-        carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice", "Archimede"]   # Loads to be estimated
         for i in range(len(carichiSE)-1):
             net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i])
             net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i +1])
         net.ext_grid.vm_pu[0]=float(solution[2*len(carichiSE)])
+        A = net.load.p_mw
+        print(A)
+        A = net.load.q_mvar
+        print(A)
         pp.runpp(net,numba=False)
 
         tensioni_calc, delta = [], []
-        nodi_noti = ["12", "11", "16", "1", "6"] #nodi_noti in english means nodes_known
         for i in range(len(nodi_noti)-1):
             tensione = net.res_bus.vm_pu.at[float(nodi_noti[i])]
             tensioni_calc.append(tensione)
@@ -261,7 +273,6 @@ while True:
                   ]
     parent_selection_type = "sss"
     keep_parents = 1
-    carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice", "Archimede"]
     crossover_type = "single_point"
     mutation_type = "random"
     mutation_percent_genes = 50
@@ -290,7 +301,7 @@ while True:
     ga_instance.run()
     end = time.time()
 
-    ora_attuale = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+    
 
     o = open(r"KPI_GA_Execution_Time.csv.txt", "a")
     o.write("\n"+ f"[{ora_attuale}];" +str(end - start))
@@ -306,7 +317,6 @@ while True:
     ora_attuale = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-3]
 
     ## CALCOLO I RISULTATI E LI MOSTRO
-    carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice"]
     for i in range(len(carichiSE)-1):
         net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i])
         net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i +1])
@@ -330,7 +340,6 @@ while True:
     pp.runpp(net,numba=False) #execution of power flow
 
 #####Pubblicazione Tensioni
-    nodi_noti = ["12", "11", "16", "5", "1", "6"]
     tensioni_calc, delta = [], []
     for i in range(len(nodi_noti)-1):
         tensione = net.res_bus.vm_pu.at[float(nodi_noti[i])]
@@ -422,7 +431,9 @@ while True:
     reverse.write(f"[{ora_attuale}]; {rpf}; \n")    # scrivo la potenza che passa nel trasformatore EXSIT, è negativa se è RPF, positiva se va verso il carico.
     reverse.close()
 
-
+    o = open(r"ANGELINI_ESTIMATED.txt", "a")
+    o.write("\n" + f"[{ora_attuale}];" + str(solution[8]))
+    o.close()
 # #######################################################################################################################
 # #######################################################################################################################
 # #######################################################################################################################
