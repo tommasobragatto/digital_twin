@@ -1,0 +1,17 @@
+Disconnected from the broker
+Sum of all P values across Tre T: -4934.922
+Sum of all Q values across Tre T: -10963.854000000001
+Sum of all P values across Archimede: 2810.7200000000003
+Sum of all Q values across Archimede: -6105.3240000000005
+Traceback (most recent call last):
+  File "C:\Users\ghoreishi.m\OneDrive - ASM Terni S.p.a\WORK\Mohammad Ghoreishi\ASM Terni\Feeder FDP\test_2 - Copy\main.py", line 130, in <module>
+    data_4 = json.load(F)
+  File "C:\Program Files (x86)\Thonny\lib\json\__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "C:\Program Files (x86)\Thonny\lib\json\__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+  File "C:\Program Files (x86)\Thonny\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "C:\Program Files (x86)\Thonny\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
