@@ -156,22 +156,22 @@ def fdipolo_network():
 #     tr7 = pp.create_transformer(net, "00102000724A1", "00102000724A1_LV", std_type, name="TECHNOMULTISERVICE_TR", in_service=True, parallel=1) THERE IS NO TRANSF. 
     tr6 = pp.create_transformer(net, hv_bus=pp.get_element_index(net,  "bus","00102000764A1"), lv_bus=pp.get_element_index(net, "bus","00102000764A1_LV"), std_type="ANGELINI_TR_250kVA", name="ARCHIMEDE_TR", in_service=True, parallel=1)
 
-    
+
     # create loads
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000459A1_LV"), p_mw=0.050, q_mvar=0, name="Siemens_1", scaling=1.0, in_service=True, type='wye')
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000459A1_LV"), p_mw=0.050, q_mvar=0, name="Siemens_2", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000459A1_LV"), p_mw=0.000525, q_mvar=-0.001888, name="Siemens_1", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000459A1_LV"), p_mw=0.000100, q_mvar=0.000100, name="Siemens_2", scaling=1.0, in_service=True, type='wye')
 
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000722A1_LV"), p_mw=0.050, q_mvar=0, name="Fontana_di_polo_1", scaling=1.0, in_service=True, type='wye')
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000722A1_LV"), p_mw=0.050, q_mvar=0, name="Fontana_di_polo_2", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000722A1_LV"), p_mw=0.016710, q_mvar=-0.025789, name="Fontana_di_polo_1", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000722A1_LV"), p_mw=0.000100, q_mvar=0.000100, name="Fontana_di_polo_2", scaling=1.0, in_service=True, type='wye')
     
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000723A1_LV"), p_mw=0.050, q_mvar=0, name="Aviosuperficie", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000723A1_LV"), p_mw=-0.058715, q_mvar=-0.082985, name="Aviosuperficie", scaling=1.0, in_service=True, type='wye')
 
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000725A1_LV"), p_mw=0.050, q_mvar=0, name="Tre_T_1", scaling=1.0, in_service=True, type='wye')
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000725A1_LV"), p_mw=0.050, q_mvar=0, name="Tre_T_2", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000725A1_LV"), p_mw=-0.002880, q_mvar=-0.008816, name="Tre_T_1", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000725A1_LV"), p_mw=0.000100, q_mvar=0.000100, name="Tre_T_2", scaling=1.0, in_service=True, type='wye')
     
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000827A1_LV"), p_mw=0.050, q_mvar=0, name="Angelini", scaling=1.0, in_service=True, type='wye')
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000724A1_LV"), p_mw=0.050, q_mvar=0, name="Tecnomultiservice", scaling=1.0, in_service=True, type='wye')
-    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000764A1_LV"), p_mw=0.050, q_mvar=0, name="Archimede", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000827A1_LV"), p_mw=0.0, q_mvar=0, name="Angelini", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000724A1_LV"), p_mw=0.000100, q_mvar=0.000100, name="Tecnomultiservice", scaling=1.0, in_service=True, type='wye')
+    pp.create_load(net, bus=pp.get_element_index(net, "bus", "00102000764A1_LV"), p_mw=0.000706, q_mvar=-0.008028, name="Archimede", scaling=1.0, in_service=True, type='wye')
  
 
     # 

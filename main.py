@@ -74,7 +74,7 @@ attivo_flessibilita=False
 MAX_TIME=5
 
 net = network_function_FdiPOLO_with_correct_coordinations2_LV.fdipolo_network()
-initial_population=[[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001]] #TODO
+initial_population=[[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1]] #TODO
 
 carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice", "Angelini"]   # Loads to be estimated
 nodi_noti = ["23", "24", "18", "20", "19"] #nodi_noti in english means nodes_known
@@ -183,6 +183,8 @@ while True:
     Q_ANGELINI_max = df.iloc[time_interval_index]["Q_ANGELINI_LV_max"]/1000000
     P_ANGELINI_min = df.iloc[time_interval_index]["P_ANGELINI_LV_min"]/1000000
     Q_ANGELINI_min = df.iloc[time_interval_index]["Q_ANGELINI_LV_min"]/1000000
+       
+
     ############################################              
     # Load the JSON data from the file
     F = open("received_6.json")
@@ -253,7 +255,7 @@ while True:
     num_generations = 50
     num_parents_mating = 4
     sol_per_pop = 5
-    num_genes = 9
+    num_genes = 11
 
     # Leggo i valori medi delle potenze che passano nei nodi 9, 10 e 11, così da fare una stima più accurata ed inserirli nel gene_space con + o - 20%
     h=time.localtime().tm_hour
