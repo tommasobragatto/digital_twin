@@ -153,7 +153,7 @@ def fdipolo_network():
     tr3 = pp.create_transformer(net, hv_bus=pp.get_element_index(net, "bus", "00102000723A1"), lv_bus=pp.get_element_index(net, "bus","00102000723A1_LV"), std_type="AVIOSUPERFICIE_TR_400kVA", name="AVIOSUPERFICIE_TR", in_service=True, parallel=1)
     tr4 = pp.create_transformer(net, hv_bus=pp.get_element_index(net,  "bus","00102000725A1"), lv_bus=pp.get_element_index(net, "bus","00102000725A1_LV"), std_type="SIEMENS_TR_160kVA", name="TRE_T_TR", in_service=True, parallel=1)
     tr5 = pp.create_transformer(net, hv_bus=pp.get_element_index(net, "bus", "00102000827A1"), lv_bus=pp.get_element_index(net, "bus","00102000827A1_LV"), std_type="ANGELINI_TR_250kVA", name="ANGELINI_TR", in_service=True, parallel=1)
-#     tr7 = pp.create_transformer(net, "00102000724A1", "00102000724A1_LV", std_type, name="TECHNOMULTISERVICE_TR", in_service=True, parallel=1) THERE IS NO TRANSF. 
+    tr7 = pp.create_transformer(net, hv_bus=pp.get_element_index(net, "bus", "00102000724A1"), lv_bus=pp.get_element_index(net, "bus","00102000724A1_LV"), std_type="ANGELINI_TR_250kVA", name="ANGELINI_TR", in_service=True, parallel=1) 
     tr6 = pp.create_transformer(net, hv_bus=pp.get_element_index(net,  "bus","00102000764A1"), lv_bus=pp.get_element_index(net, "bus","00102000764A1_LV"), std_type="ANGELINI_TR_250kVA", name="ARCHIMEDE_TR", in_service=True, parallel=1)
 
 

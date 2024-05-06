@@ -74,7 +74,7 @@ attivo_flessibilita=False
 MAX_TIME=5
 
 net = network_function_FdiPOLO_with_correct_coordinations2_LV.fdipolo_network()
-initial_population=[[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1]] #TODO
+initial_population=[[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1]] #TODO
 
 carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice", "Angelini"]   # Loads to be estimated
 nodi_noti = ["23", "24", "18", "20", "19"] #nodi_noti in english means nodes_known
@@ -230,15 +230,11 @@ while True:
     misure = [data_1["Lines"][0]["V"]["Value"][0], data_3["Lines"][0]["V"]["Value"][0], data_4["Lines"][0]["V"]["Value"][0], data_5["Lines"][0]["V"]["Value"][0], data_6["Lines"][0]["V"]["Value"][0], data_7["Lines"][0]["V"]["Value"][0]]
 #### STATE ESTITMATION ##########    
     def fitness_func(ga_instance, solution, solution_idx):
-
+        
         for i in range(len(carichiSE)-1):
             net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i])
             net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i +1])
-        net.ext_grid.vm_pu[0]=float(solution[2*len(carichiSE)])
-        A = net.load.p_mw
-        print(A)
-        A = net.load.q_mvar
-        print(A)
+        df.loc[0, 'net.ext_grid.vm_pu'] =float(solution[2*len(carichiSE)])
         pp.runpp(net,numba=False)
 
         tensioni_calc, delta = [], []
@@ -246,15 +242,17 @@ while True:
             tensione = net.res_bus.vm_pu.at[float(nodi_noti[i])]
             tensioni_calc.append(tensione)
             delta.append(float(misure[i]) - tensioni_calc[i]*230)
+            print(delta)
         fitness = len(nodi_noti) / numpy.dot(delta, delta)
+        print(fitness)
         return fitness
 
 
     fitness_function = fitness_func
 
-    num_generations = 50
+    num_generations = 3
     num_parents_mating = 4
-    sol_per_pop = 5
+    sol_per_pop = 10
     num_genes = 11
 
     # Leggo i valori medi delle potenze che passano nei nodi 9, 10 e 11, così da fare una stima più accurata ed inserirli nel gene_space con + o - 20%
@@ -280,12 +278,12 @@ while True:
     mutation_percent_genes = 50
     stop_criteria="reach_4" #Tolleranza 0.25 V
 
-    def on_generation(ga):
-        print("Generation", ga.generations_completed)
-        print(ga.population)
-
+    def on_generation(ga_instance):
+        print(f"Generation = {ga_instance.generations_completed}")
+        print(f"Fitness    = {ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)[1]}")
 
     ga_instance = pygad.GA(num_generations=num_generations,
+                           on_generation=on_generation,
                            num_parents_mating=num_parents_mating,
                            fitness_func=fitness_function,
                            sol_per_pop=sol_per_pop,
@@ -310,7 +308,7 @@ while True:
     o.close()
 
     solution, solution_fitness, solution_idx = ga_instance.best_solution()
-    initial_population = [solution, solution, solution, solution, solution]
+    initial_population = [solution, solution, solution, solution, solution, solution, solution, solution, solution, solution]
 
     o = open(r"GA_Fitness.csv.txt", "a")
     o.write("\n" + f"[{ora_attuale}];" + str(1 / solution_fitness))
@@ -322,7 +320,7 @@ while True:
     for i in range(len(carichiSE)-1):
         net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i])
         net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i +1])
-    net.ext_grid.vm_pu[0]=float(solution[2*len(carichiSE)])
+    df.loc[0, 'net.ext_grid.vm_pu'] =float(solution[2*len(carichiSE)])
     pp.runpp(net,numba=False)
     
     for i in range(len(carichiSE)-1):
