@@ -4,17 +4,17 @@ import network_function_FdiPOLO_with_correct_coordinations2_LV
 import time
 import pygad
 import numpy
-import time
 import csv
 import matplotlib.pyplot as plt
 from datetime import datetime
 import paho.mqtt.client as mqtt
-
-from datetime import datetime
 import pandas as pd
-
+import numpy as np
+import ast
 import subprocess
 import openpyxl
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 fig, ax = plt.subplots(3, 1, sharex=True)  # Create a figure with 3 subplots (3 rows, 1 column)
 
@@ -35,20 +35,20 @@ ax[2].set_title("Reverse Power Flow (kW)")
 def update_plot():
     global timestamps, y0, y1, y2
 
-    
+   
     line1.set_xdata(timestamps)
     line1.set_ydata(y0)
-    
+   
     line2.set_xdata(timestamps)
     line2.set_ydata(y1)
-    
+   
     line3.set_xdata(timestamps)
     line3.set_ydata(y2)
-    
-    
+   
+   
     ax[0].relim()
     ax[0].autoscale_view()
-    
+   
     ax[1].relim()
     ax[1].autoscale_view()
 
@@ -74,18 +74,21 @@ attivo_flessibilita=False
 MAX_TIME=5
 
 net = network_function_FdiPOLO_with_correct_coordinations2_LV.fdipolo_network()
-initial_population=[[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1],[0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,0.0001,1]] #TODO
+initial_population=[[0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 1],
+                    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 1],
+                    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 1],
+                    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 1],
+                    [0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 0.0001, 1]]
 
-
-carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice", "Angelini"]   # Loads to be estimated
-nodi_noti = ["23", "24", "18", "20", "19"] #nodi_noti in english means nodes_known
+carichiSE = ["Siemens_2", "Tre_T_2", "Fontana_di_polo_2", "Tecnomultiservice"]   # Loads to be estimated
+nodi_noti = ["23", "24", "18", "20"] #nodi_noti in english means nodes_known
 
 
 while True:
     inizio = time.time()
 ### INDIVIDUAL METERS ARE INVOKED IN ORDER TO COLLECT DATA ###
-    #subprocess.call(['python', "testMain.py"])
-    
+    subprocess.call(['python', "testMain.py"])
+   
     ####################################################################################################################################              
     ora_attuale = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
     # Load the MV dataset
@@ -96,8 +99,8 @@ while True:
     current_time = datetime.now().replace(second=0, microsecond=0, minute=(datetime.now().minute // 15) * 15)
     # Calculate the index of the time interval in the dataset
     time_interval_index = current_day * 96 + current_time.hour * 4 + current_time.minute // 15
-    
-    ############################################                 #check manual for Active Power 
+   
+    ############################################                 #check manual for Active Power
     # Load the JSON data from the file
     F = open("received_1.json")
     data_1 = json.load(F)
@@ -116,7 +119,7 @@ while True:
     Q_TRET_max = df.iloc[time_interval_index]["Q_TRET_max"]/1000000
     P_TRET_min = df.iloc[time_interval_index]["P_TRET_min"]/1000000
     Q_TRET_min = df.iloc[time_interval_index]["Q_TRET_min"]/1000000
-    ############################################             
+    ############################################            
     # Load the JSON data from the file
     F = open("received_3.json")
     data_3 = json.load(F)
@@ -129,7 +132,7 @@ while True:
     print("Sum of all Q values across Archimede:", sum(all_q_values_3))
     net.load.p_mw.at[pp.get_element_index(net, "load", "Archimede")] = sum(all_p_values_3)/1000000
     net.load.q_mvar.at[pp.get_element_index(net, "load", "Archimede")] = sum(all_q_values_3)/1000000  
-    ############################################             
+    ############################################            
     # Load the JSON data from the file
     F = open("received_4.json")
     data_4 = json.load(F)
@@ -142,7 +145,7 @@ while True:
     print("Sum of all Q values across Siemens:", sum(all_q_values_4))
     net.load.p_mw.at[pp.get_element_index(net, "load", "Siemens_1")] = sum(all_p_values_4)/1000000
     net.load.q_mvar.at[pp.get_element_index(net, "load", "Siemens_1")] = sum(all_q_values_4)/1000000
-    
+   
     # Extract active and reactive values for the calculated index
     P_SIEMENS_6_max = df.iloc[time_interval_index]["P_SIEMENS_6_max"]/1000000
     Q_SIEMENS_6_max = df.iloc[time_interval_index]["Q_SIEMENS_6_max"]/1000000
@@ -160,31 +163,31 @@ while True:
     Q_SIEMENS_P_min = df.iloc[time_interval_index]["Q_SIEMENS_P_min"]/1000000
 
     ############################################                  
-    # Load the JSON data from the file
-    F = open("received_5.json")
-    data_5 = json.load(F)
-    all_p_values_5 = []     # Extract all "P" values from all lines
-    all_q_values_5 = []     # Extract all "Q" values from all lines
-    for line in data_5["Lines"]:
-        all_p_values_5.extend(line["P"]["Value"])
-        all_q_values_5.extend(line["Q"]["Value"])
-    print("Sum of all P values across Angelini:", sum(all_p_values_5))
-    print("Sum of all Q values across Angelini:", sum(all_q_values_5))
-    net.load.p_mw.at[pp.get_element_index(net, "load", "Angelini")] = sum(all_p_values_5)/1000000
-    net.load.q_mvar.at[pp.get_element_index(net, "load", "Angelini")] = sum(all_q_values_5)/1000000
- 
- 
-    o = open(r"ANGELINI_MEASURED.txt", "a")
-    o.write("\n" + f"[{ora_attuale}];" + str(sum(all_q_values_5)/1000000))
-    o.close()
-    
-    # Extract active and reactive values for the calculated index
-    
-    P_ANGELINI_max = df.iloc[time_interval_index]["P_ANGELINI_LV_max"]/1000000
-    Q_ANGELINI_max = df.iloc[time_interval_index]["Q_ANGELINI_LV_max"]/1000000
-    P_ANGELINI_min = df.iloc[time_interval_index]["P_ANGELINI_LV_min"]/1000000
-    Q_ANGELINI_min = df.iloc[time_interval_index]["Q_ANGELINI_LV_min"]/1000000
-       
+#     # Load the JSON data from the file
+#     F = open("received_5.json")
+#     data_5 = json.load(F)
+#     all_p_values_5 = []     # Extract all "P" values from all lines
+#     all_q_values_5 = []     # Extract all "Q" values from all lines
+#     for line in data_5["Lines"]:
+#         all_p_values_5.extend(line["P"]["Value"])
+#         all_q_values_5.extend(line["Q"]["Value"])
+#     print("Sum of all P values across Angelini:", sum(all_p_values_5))
+#     print("Sum of all Q values across Angelini:", sum(all_q_values_5))
+#     net.load.p_mw.at[pp.get_element_index(net, "load", "Angelini")] = sum(all_p_values_5)/1000000
+#     net.load.q_mvar.at[pp.get_element_index(net, "load", "Angelini")] = sum(all_q_values_5)/1000000
+#  
+#  
+#     o = open(r"ANGELINI_MEASURED.txt", "a")
+#     o.write("\n" + f"[{ora_attuale}];" + str(sum(all_q_values_5)/1000000))
+#     o.close()
+#    
+#     # Extract active and reactive values for the calculated index
+#    
+#     P_ANGELINI_max = df.iloc[time_interval_index]["P_ANGELINI_LV_max"]/1000000
+#     Q_ANGELINI_max = df.iloc[time_interval_index]["Q_ANGELINI_LV_max"]/1000000
+#     P_ANGELINI_min = df.iloc[time_interval_index]["P_ANGELINI_LV_min"]/1000000
+#     Q_ANGELINI_min = df.iloc[time_interval_index]["Q_ANGELINI_LV_min"]/1000000
+#        
 
     ############################################              
     # Load the JSON data from the file
@@ -199,7 +202,7 @@ while True:
     print("Sum of all Q values across Aviosuperficie:", sum(all_q_values_6))
     net.load.p_mw.at[pp.get_element_index(net, "load", "Aviosuperficie")] = sum(all_p_values_6)/1000000
     net.load.q_mvar.at[pp.get_element_index(net, "load", "Aviosuperficie")] = sum(all_q_values_6)/1000000
-    
+   
     P_PV_PROD = data_6["Lines"][1]["P"]["Value"]
     P_PV_PROD = sum(P_PV_PROD)/1000000
     ############################################                
@@ -215,7 +218,7 @@ while True:
     print("Sum of all Q values across Fontana di Polo:", sum(all_q_values_7))
     net.load.p_mw.at[pp.get_element_index(net, "load", "Fontana_di_polo_1")] = sum(all_p_values_7)/1000000
     net.load.q_mvar.at[pp.get_element_index(net, "load", "Fontana_di_polo_1")] = sum(all_q_values_7)/1000000
-    
+   
     # Extract active and reactive values for the calculated index
     P_FDP_max = df.iloc[time_interval_index]["P_FDP_max"]/1000000
     Q_FDP_max = df.iloc[time_interval_index]["Q_FDP_max"]/1000000
@@ -228,35 +231,41 @@ while True:
     P_TECHNO_min = df.iloc[time_interval_index]["P_TECHNO_min"]/1000000
     Q_TECHNO_min = df.iloc[time_interval_index]["Q_TECHNO_min"]/1000000
     ############################################    ## COLLECTION OF THE VOLTAGES FOR THE STATE ESTIMATION
-    misure = [data_1["Lines"][0]["V"]["Value"][0], data_3["Lines"][0]["V"]["Value"][0], data_4["Lines"][0]["V"]["Value"][0], data_5["Lines"][0]["V"]["Value"][0], data_6["Lines"][0]["V"]["Value"][0], data_7["Lines"][0]["V"]["Value"][0]]
+    misure = [data_1["Lines"][0]["V"]["Value"][0], data_3["Lines"][0]["V"]["Value"][0], data_4["Lines"][0]["V"]["Value"][0], data_6["Lines"][0]["V"]["Value"][0], data_7["Lines"][0]["V"]["Value"][0]]
 #### STATE ESTITMATION ##########    
     def fitness_func(ga_instance, solution, solution_idx):
 
+        print(f"GA Solution: {solution}")
+
         for i in range(len(carichiSE)-1):
+            if carichiSE[i] == "Angelini":
+                continue  # Skip Angelini
             net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i])
             net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i +1])
-        net.ext_grid.vm_pu[0]=float(solution[2*len(carichiSE)])
-        A = net.load.p_mw
-        print(A)
-        A = net.load.q_mvar
-        print(A)
-        pp.runpp(net,numba=False)
+        df.loc[0, 'net.ext_grid.vm_pu'] =float(solution[2*len(carichiSE)])
+        pp.runpp(net, numba=False, max_iteration=50)
 
         tensioni_calc, delta = [], []
         for i in range(len(nodi_noti)-1):
             tensione = net.res_bus.vm_pu.at[float(nodi_noti[i])]
             tensioni_calc.append(tensione)
             delta.append(float(misure[i]) - tensioni_calc[i]*230)
+            print(f"Delta values (voltage differences): {delta}")
+            print(f"Node {nodi_noti[i]} -> Measured voltage: {float(misure[i])} V")
+            print(f"Node {nodi_noti[i]} -> Calculated voltage: {float(tensioni_calc[i]) * 230} V")
+
+            
         fitness = len(nodi_noti) / numpy.dot(delta, delta)
+        print(fitness)
         return fitness
 
 
     fitness_function = fitness_func
 
     num_generations = 50
-    num_parents_mating = 4
-    sol_per_pop = 10
-    num_genes = 11
+    num_parents_mating = 1
+    sol_per_pop = 5
+    num_genes = 9
 
     # Leggo i valori medi delle potenze che passano nei nodi 9, 10 e 11, così da fare una stima più accurata ed inserirli nel gene_space con + o - 20%
     h=time.localtime().tm_hour
@@ -270,8 +279,8 @@ while True:
                   numpy.linspace(Q_FDP_min, Q_FDP_max, 10), # carico Fontana_di_polo_2, per la Q faccio + e - il 5% della potenza nominale(100 kVA)
                   numpy.linspace(P_TECHNO_min, P_TECHNO_max, 20), # carico Technomultiservice, per la P faccio + e - il 10% della potenza nominale(160 kVA)
                   numpy.linspace(Q_TECHNO_min, Q_TECHNO_max, 10), # carico  Technomultiservice, per la Q faccio + e - il 5% della potenza nominale(100 kVA)
-                  numpy.linspace(P_ANGELINI_min, P_ANGELINI_max, 20), # carico Angelini, per la P faccio + e - il 10% della potenza nominale(160 kVA)
-                  numpy.linspace(Q_ANGELINI_min, Q_ANGELINI_max, 10), # carico Angelini, per la Q faccio + e - il 5% della potenza nominale(100 kVA)
+#                   numpy.linspace(P_ANGELINI_min, P_ANGELINI_max, 20), # carico Angelini, per la P faccio + e - il 10% della potenza nominale(160 kVA)
+#                   numpy.linspace(Q_ANGELINI_min, Q_ANGELINI_max, 10), # carico Angelini, per la Q faccio + e - il 5% della potenza nominale(100 kVA)
                   numpy.linspace(0.89, 1.11, 20)
                   ]
     parent_selection_type = "sss"
@@ -281,12 +290,12 @@ while True:
     mutation_percent_genes = 50
     stop_criteria="reach_4" #Tolleranza 0.25 V
 
-    def on_generation(ga):
-        print("Generation", ga.generations_completed)
-        print(ga.population)
-
+    def on_generation(ga_instance):
+        print(f"Generation = {ga_instance.generations_completed}")
+        print(f"Fitness    = {ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)[1]}")
 
     ga_instance = pygad.GA(num_generations=num_generations,
+                           on_generation=on_generation,
                            num_parents_mating=num_parents_mating,
                            fitness_func=fitness_function,
                            sol_per_pop=sol_per_pop,
@@ -304,14 +313,14 @@ while True:
     ga_instance.run()
     end = time.time()
 
-    
+   
 
     o = open(r"KPI_GA_Execution_Time.csv.txt", "a")
     o.write("\n"+ f"[{ora_attuale}];" +str(end - start))
     o.close()
 
     solution, solution_fitness, solution_idx = ga_instance.best_solution()
-    initial_population = [solution, solution, solution, solution, solution]
+    initial_population = [solution, solution, solution, solution, solution, solution, solution, solution, solution, solution]
 
     o = open(r"GA_Fitness.csv.txt", "a")
     o.write("\n" + f"[{ora_attuale}];" + str(1 / solution_fitness))
@@ -321,14 +330,19 @@ while True:
 
     ## CALCOLO I RISULTATI E LI MOSTRO
     for i in range(len(carichiSE)-1):
+        if carichiSE[i] == "Angelini":  # Replace with Angelini's correct identifier
+            continue  # Skip Angelini
         net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i])
         net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i +1])
-    net.ext_grid.vm_pu[0]=float(solution[2*len(carichiSE)])
+    df.loc[0, 'net.ext_grid.vm_pu'] =float(solution[2*len(carichiSE)])
     pp.runpp(net,numba=False)
-    
-    for i in range(len(carichiSE)-1):
-        net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i]) #fuction example for pandapower
-        net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])] = float(solution[2 * i +1])
+   
+    for i in range(len(carichiSE) - 1):
+        load_index = pp.get_element_index(net, "load", carichiSE[i])
+        p_mw = net.res_load.p_mw.at[load_index]
+        q_mvar = net.res_load.q_mvar.at[load_index]
+        print(f"Load {carichiSE[i]} -> Calculated P: {p_mw} MW, Calculated Q: {q_mvar} MVar")
+
         #Publishing on MQTT
         json_object["d"] = solution[2 * i]
         json_object["ts"] = ora_attuale
@@ -369,7 +383,7 @@ while True:
     potenza_SE = open(r".\potenza_SE.txt", "a")
     potenza_SE.write(f"[{ora_attuale}]; ")
     potenza_SE.close()
-        
+       
     for i in range(len(carichiSE)-1):
         pot_attiva= net.load.p_mw.at[pp.get_element_index(net, "load", carichiSE[i])]
         pot_reattiva = net.load.q_mvar.at[pp.get_element_index(net, "load", carichiSE[i])]
@@ -384,7 +398,7 @@ while True:
     # # EXPORT VOLTAGE PU IN THE PRIMARY SUBSTATION (USEFUL FOR FLEXIBILITY OPTIMIZATION)
     tensione_pu = open(r"tensione_master_SE.txt", "a")
     tensione_pu.write(f"[{ora_attuale}]; ")
-    voltage_pu = net.res_bus.vm_pu.at[17]  # OBJECT PROGRAMMING - net: 
+    voltage_pu = net.res_bus.vm_pu.at[17]  # OBJECT PROGRAMMING - net:
     print(voltage_pu)
     tensione_pu.write(f"{voltage_pu}; ")
     tensione_pu.write("\n")
@@ -401,7 +415,7 @@ while True:
     voltage = open(r"tensioni_SE.txt", "a")
     voltage.write("\n")
     voltage.close()
-    
+   
     # EXPORT VOLTAGE ERRORS FOR EACH MBT
     voltage= open(r"tensioni_ERROR.txt", "a")
     voltage.write(f"[{ora_attuale}]; ")
@@ -450,7 +464,7 @@ while True:
 # #######################################################################################################################
     if attivo_flessibilita==True:
 #         valori_flusso=[]
-# 
+#
 #         reverse= open("RPF.txt", "r")
 #             for riga in reverse:
 #                 valori_flusso.append(float(riga[1]))
@@ -465,20 +479,20 @@ while True:
 #         val_70=np.percentile(valori_flusso, 70)
 #         val_80=np.percentile(valori_flusso, 80)
 #         val_90=np.percentile(valori_flusso, 90)
-# 
+#
 #         print("il flusso in cabina primaria rpf è", str(rpf))
-        
+       
         # utilizzo lo stato di carica che avevo lasciato dalla iterazione precedente
         batterie = ["BEMS", "Celi", "Mazzocchio", "Croci", "Scov", "Slow", "Fast"]
-        
+       
         ##Charging Stations
 #         for i in range(7):
 #             # Modify the storage values using Pandapower
 #             pp.runpp(net)  # Run power flow before modifying storage values
 #             net.storage.loc[batterie[i], "p_mw"] = prossimi_kWh_stored[i]
 #             pp.runpp(net)  # Run power flow after modifying storage values
-# 
-# 
+#
+#
 #         # Check if there are electric vehicles and enable them for flexibility if their load is greater than 3 MW
 #         enabled_Slow = net.load.loc["Slow", "p_mw"]
 #         if enabled_Slow > 3:
@@ -492,7 +506,7 @@ while True:
 #             net.storage.loc["Slow", "min_p_mw"] = 0  # Set minimum power output to 0
 #             net.storage.loc["Slow", "q_mvar"] = 0  # Set reactive power output to 0
 #             net.storage.loc["Slow", "soc_percent"] = 100  # Set state of charge to 100%
-# 
+#
 #         enabled_Fast = net.load.loc["Fast", "p_mw"]
 #         if enabled_Fast > 3:
 #             # Enable the storage element
@@ -579,10 +593,10 @@ while True:
             soc = net.storage.at[elemento, "p_mw"]
             prossimi_kWh_stored.append(soc)
             p = net.storage.at[elemento, "p_mw"]
-            
+           
             state_of_charge_data[elemento] = soc
             power_data[elemento] = p
-            
+           
             state_of_charge = open(r"SOC_DR.txt", "w")
             state_of_charge.write(f"[{ora_attuale}]; {rpf}; \n")
             state_of_charge.close()
@@ -595,7 +609,7 @@ while True:
         potenza = open(r"P_storage.txt", "a")
         potenza.write("\n")
         potenza.close()
-        
+       
 
         ### or instead of 12 previous lines---->ask Tommaso
 #         state_of_charge_df = pd.DataFrame(state_of_charge_data)
@@ -608,7 +622,7 @@ while True:
         rpf = net.res_ext_grid.p_mw.at[0]
         reverse.write(f"[{ora_attuale}]; {rpf}; \n")    # scrivo la potenza che passa nel trasformatore EXSIT, è negativa se è RPF, positiva se va verso il carico.
         reverse.close()
-        
+       
         fine = time.time()
         durata = fine - inizio
 
@@ -634,12 +648,12 @@ while True:
 #     print(w4p_data['dt'])
 #     print(w4p_data['ts'])
 #     print(w4p_data['q'])
-# 
+#
 #     # Extract x and y values from other data in a similar manner
 #     # Plot the data
 #     x_values = w4p_data['d']
 #     w4p_values = w4p_data['q']
-# 
+#
 #     plt.figure(figsize=(10, 6))
 #     plt.plot(x_values, w4p_values, label='W4_P')
 #     # Plot other data in a similar manner
@@ -650,32 +664,32 @@ while True:
 #     plt.legend()
 #     # Show the plot
 #     plt.show()
-    
+   
     # import csv  # THERE IS A BIG VALUE IN THE RESULT FILE
     # from datetime import datetime
     # import matplotlib.pyplot as plt
-    # 
+    #
     # # Define the path to the result file
     # file_path = "KPI_GA_Execution_Time.csv.txt"
-    # 
+    #
     # # Create empty lists to store the data
     # dates = []
     # values = []
-    # 
+    #
     # # Read the CSV file
     # try:
     #     with open(file_path, "r") as csv_file:
     #         csv_reader = csv.reader(csv_file, delimiter=";")
     #         next(csv_reader)  # Skip the header row
-    #         
+    #        
     #         # Iterate over each row in the CSV file
     #         for row in csv_reader:
     #             if len(row) >= 2:
     #                 datetime_str = row[0].strip("[]")
     #                 value = float(row[1])
-    #                 
+    #                
     #                 date = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
-    #                 
+    #                
     #                 dates.append(date)
     #                 values.append(value)
     #             else:
@@ -684,7 +698,7 @@ while True:
     #     print(f"File not found: {file_path}")
     # except ValueError:
     #     print("Error occurred while parsing the value.")
-    #     
+    #    
     # # Plotting the values
     # plt.plot(dates, values)
     # plt.title("Values Over Time")
@@ -696,31 +710,31 @@ while True:
 #     import csv  # REMOVED BIG VALUE FROM THE FILE.
 #     from datetime import datetime
 #     import matplotlib.pyplot as plt
-# 
+#
 #     # Define the path to the result file
 #     file_path = "KPI_GA_Execution_Time.csv.txt"
-# 
+#
 #     # Create empty lists to store the data
 #     dates = []
 #     values = []
-# 
+#
 #     # Read the CSV file
 #     try:
 #         with open(file_path, "r") as csv_file:
 #             csv_reader = csv.reader(csv_file, delimiter=";")
 #             next(csv_reader)  # Skip the header row
-#             
+#            
 #             # Iterate over each row in the CSV file
 #             for row in csv_reader:
 #                 datetime_str = row[0].strip("[]")
 #                 value = float(row[1])
-#                 
+#                
 #                 if datetime_str != '[2023-06-15 11:44:28]' and value <= 1000:  # Skip row 312 and exclude values over 1000
 #                     date = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M:%S")
-#                     
+#                    
 #                     dates.append(date)
 #                     values.append(value)
-#         
+#        
 #         # Plotting the values
 #         plt.plot(dates, values)
 #         plt.title("Values Over Time")
@@ -728,7 +742,7 @@ while True:
 #         plt.ylabel("Value")
 #         plt.xticks(rotation=45)
 #         plt.show()
-# 
+#
 #     except FileNotFoundError:
 #         print(f"File not found: {file_path}")
 #     except ValueError:
@@ -776,7 +790,7 @@ while True:
 
     # Now, you can use the timestamps array in your plotting function.
     update_plot()
-        
+       
 #     y=[]
 #     data = numpy.genfromtxt("SOC_DR.txt", delimiter=';', dtype=None, encoding=None)
 #     print(data.shape)
@@ -786,36 +800,32 @@ while True:
 #     plt.xlabel("Timestamp")  # Set the x-axis label
 #     plt.ylabel("SOC")  # Set the y-axis label
 #     update_plot()
-    
+   
     # include RPF
     # plot current SOC: last 20 values OR srat real-time
     # modify x,y labels in the plot section, and scales
-    # 
+    #
      
 # bus_results = net.res_bus
 # line_results = net.res_line
 # load_results = net.res_load
 # sgen_results = net.res_sgen
-# 
+#
 # print("Bus Results:")
 # print(net.res_bus)
-# 
+#
 # print("\nLine Results:")
 # print(net.res_line)
-# 
+#
 # print("\nLoad Results:")
 # print(net.res_load)
-# 
+#
 # print("\nSynchronous Generator Results:")
 # print(net.res_sgen)
-# 
+#
 # print("\nExternal Grid Results:")
 # print(net.res_ext_grid)
-# 
+#
 # pp.plotting.simple_plot(net)
 
 # Run the MQTT client
-
-
-
-
